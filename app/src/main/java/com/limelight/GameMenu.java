@@ -274,22 +274,22 @@ public class GameMenu {
 
         options.add(new MenuOption(getString(R.string.game_menu_toggle_keyboard), true,
                 () -> game.toggleKeyboard()));
-
+        options.add(new MenuOption(getString(R.string.game_menu_switch_virtual_keyboard_model), true,
+                () -> game.showHidekeyBoardLayoutController()));
         options.add(new MenuOption(getString(R.string.game_menu_switch_mouse_model), true,
                 () -> game.switchMouseModel()));
-
+        options.add(new MenuOption(getString(R.string.game_menu_switch_keyboard_model), true,
+                () -> game.showHideKeyboardController()));
         options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
 
         options.add(new MenuOption(getString(R.string.game_menu_hud), true,
                 () -> game.showHUD()));
 
-        options.add(new MenuOption(getString(R.string.game_menu_switch_keyboard_model), true,
-                () -> game.showHideKeyboardController()));
+
 
         options.add(new MenuOption(getString(R.string.game_menu_switch_virtual_model), true,
                 () -> game.showHideVirtualController()));
-        options.add(new MenuOption(getString(R.string.game_menu_switch_virtual_keyboard_model), true,
-                () -> game.showHidekeyBoardLayoutController()));
+
         options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_model), true,
                 () -> game.switchTouchSensitivity()));
         options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_update_x), true,

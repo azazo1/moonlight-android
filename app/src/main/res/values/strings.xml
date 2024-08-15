@@ -306,9 +306,9 @@
     <string name="game_menu_toggle_keyboard">弹出软键盘</string>
     <string name="game_menu_hud">(显示/隐藏)性能信息</string>
     <string name="game_menu_switch_mouse_model">鼠标模式切换</string>
-    <string name="game_menu_switch_keyboard_model">(显示/隐藏)特殊按键</string>
+    <string name="game_menu_switch_keyboard_model">切换特殊按键</string>
     <string name="game_menu_switch_virtual_model">(显示/隐藏)虚拟手柄</string>
-    <string name="game_menu_switch_virtual_keyboard_model">(显示/隐藏)虚拟全键盘</string>
+    <string name="game_menu_switch_virtual_keyboard_model">切换虚拟全键盘</string>
     <string name="game_menu_switch_touch_sensitivity_model">(开启/禁用)触控灵敏度</string>
     <string name="game_menu_switch_touch_sensitivity_update_x">触控灵敏度修改X轴</string>
     <string name="game_menu_switch_touch_sensitivity_update_y">触控灵敏度修改Y轴</string>
