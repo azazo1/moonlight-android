@@ -149,9 +149,9 @@
     </string-array>
 
     <string-array name="mouse_model_names_axi">
-        <item>多点触控模式</item>
+        <item>------>多点触控模式</item>
         <item>普通鼠标模式</item>
-        <item>触控板模式</item>
+        <item>------>触控板模式</item>
         <item>禁用鼠标/触控</item>
         <item>普通鼠标模式（左右键互换）</item>
     </string-array>

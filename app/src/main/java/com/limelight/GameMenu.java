@@ -280,22 +280,20 @@ public class GameMenu {
                 () -> game.switchMouseModel()));
         options.add(new MenuOption(getString(R.string.game_menu_switch_keyboard_model), true,
                 () -> game.showHideKeyboardController()));
-        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
+//        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
 
-        options.add(new MenuOption(getString(R.string.game_menu_hud), true,
-                () -> game.showHUD()));
+//        options.add(new MenuOption(getString(R.string.game_menu_hud), true,
+//                () -> game.showHUD()));
 
+//        options.add(new MenuOption(getString(R.string.game_menu_switch_virtual_model), true,
+//                () -> game.showHideVirtualController()));
 
-
-        options.add(new MenuOption(getString(R.string.game_menu_switch_virtual_model), true,
-                () -> game.showHideVirtualController()));
-
-        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_model), true,
-                () -> game.switchTouchSensitivity()));
-        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_update_x), true,
-                () -> showSetSensitivityDialog("touchX")));
-        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_update_y), true,
-                () -> showSetSensitivityDialog("touchY")));
+//        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_model), true,
+//                () -> game.switchTouchSensitivity()));
+//        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_update_x), true,
+//                () -> showSetSensitivityDialog("touchX")));
+//        options.add(new MenuOption(getString(R.string.game_menu_switch_touch_sensitivity_update_y), true,
+//                () -> showSetSensitivityDialog("touchY")));
 
         if (device != null) {
             options.addAll(device.getGameMenuOptions());
