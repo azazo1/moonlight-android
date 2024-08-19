@@ -1,9 +1,29 @@
 package com.limelight;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.HashSet;
-import java.util.List;
+import android.app.Activity;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.limelight.computers.ComputerManagerListener;
 import com.limelight.computers.ComputerManagerService;
@@ -22,32 +42,12 @@ import com.limelight.utils.ShortcutHelper;
 import com.limelight.utils.SpinnerDialog;
 import com.limelight.utils.UiHelper;
 
-import android.app.Activity;
-import android.app.Service;
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-
 import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashSet;
+import java.util.List;
 
 public class AppView extends Activity implements AdapterFragmentCallbacks {
     private AppGridAdapter appGridAdapter;
@@ -82,7 +82,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder binder) {
             final ComputerManagerService.ComputerManagerBinder localBinder =
-                    ((ComputerManagerService.ComputerManagerBinder)binder);
+                    ((ComputerManagerService.ComputerManagerBinder) binder);
 
             // Wait in a separate thread to avoid stalling the UI
             new Thread() {
@@ -343,7 +343,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
             LimeLog.info("Loaded applist from cache");
         } catch (IOException | XmlPullParserException e) {
             if (lastRawApplist != null) {
-                LimeLog.warning("Saved applist corrupted: "+lastRawApplist);
+                LimeLog.warning("Saved applist corrupted: " + lastRawApplist);
                 e.printStackTrace();
             }
             LimeLog.info("Loading applist from the network");
@@ -395,14 +395,16 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         AppObject selectedApp = (AppObject) appGridAdapter.getItem(info.position);
 
+        // 直接串流不询问.
+        ServerHelper.doStart(AppView.this, selectedApp.app, computer, managerBinder);
+
         menu.setHeaderTitle(selectedApp.app.getAppName());
 
         if (lastRunningAppId != 0) {
             if (lastRunningAppId == selectedApp.app.getAppId()) {
                 menu.add(Menu.NONE, START_OR_RESUME_ID, 1, getResources().getString(R.string.applist_menu_resume));
                 menu.add(Menu.NONE, QUIT_ID, 2, getResources().getString(R.string.applist_menu_quit));
-            }
-            else {
+            } else {
                 menu.add(Menu.NONE, START_WITH_QUIT, 1, getResources().getString(R.string.applist_menu_quit_and_start));
             }
         }
@@ -422,7 +424,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
             ImageView appImageView = info.targetView.findViewById(R.id.grid_image);
             if (appImageView != null) {
                 // We have a grid ImageView, so we must be in grid-mode
-                BitmapDrawable drawable = (BitmapDrawable)appImageView.getDrawable();
+                BitmapDrawable drawable = (BitmapDrawable) appImageView.getDrawable();
                 if (drawable != null && drawable.getBitmap() != null) {
                     // We have a bitmap loaded too
                     menu.add(Menu.NONE, CREATE_SHORTCUT_ID, 5, getResources().getString(R.string.applist_menu_scut));
@@ -463,15 +465,15 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
                         suspendGridUpdates = true;
                         ServerHelper.doQuit(AppView.this, computer,
                                 app.app, managerBinder, new Runnable() {
-                            @Override
-                            public void run() {
-                                // Trigger a poll immediately
-                                suspendGridUpdates = false;
-                                if (poller != null) {
-                                    poller.pollNow();
-                                }
-                            }
-                        });
+                                    @Override
+                                    public void run() {
+                                        // Trigger a poll immediately
+                                        suspendGridUpdates = false;
+                                        if (poller != null) {
+                                            poller.pollNow();
+                                        }
+                                    }
+                                });
                     }
                 }, null);
                 return true;
@@ -484,8 +486,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
                 if (item.isChecked()) {
                     // Transitioning hidden to shown
                     hiddenAppIds.remove(app.app.getAppId());
-                }
-                else {
+                } else {
                     // Transitioning shown to hidden
                     hiddenAppIds.add(app.app.getAppId());
                 }
@@ -494,7 +495,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
 
             case CREATE_SHORTCUT_ID:
                 ImageView appImageView = info.targetView.findViewById(R.id.grid_image);
-                Bitmap appBits = ((BitmapDrawable)appImageView.getDrawable()).getBitmap();
+                Bitmap appBits = ((BitmapDrawable) appImageView.getDrawable()).getBitmap();
                 if (!shortcutHelper.createPinnedGameShortcut(computer, app.app, appBits)) {
                     Toast.makeText(AppView.this, getResources().getString(R.string.unable_to_pin_shortcut), Toast.LENGTH_LONG).show();
                 }
@@ -511,7 +512,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
             public void run() {
                 boolean updated = false;
 
-                    // Look through our current app list to tag the running app
+                // Look through our current app list to tag the running app
                 for (int i = 0; i < appGridAdapter.getCount(); i++) {
                     AppObject existingApp = (AppObject) appGridAdapter.getItem(i);
 
@@ -520,18 +521,15 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
                             existingApp.app.getAppId() == details.runningGameId) {
                         // This app was running and still is, so we're done now
                         return;
-                    }
-                    else if (existingApp.app.getAppId() == details.runningGameId) {
+                    } else if (existingApp.app.getAppId() == details.runningGameId) {
                         // This app wasn't running but now is
                         existingApp.isRunning = true;
                         updated = true;
-                    }
-                    else if (existingApp.isRunning) {
+                    } else if (existingApp.isRunning) {
                         // This app was running but now isn't
                         existingApp.isRunning = false;
                         updated = true;
-                    }
-                    else {
+                    } else {
                         // This app wasn't running and still isn't
                     }
                 }
@@ -620,11 +618,15 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
     @Override
     public int getAdapterFragmentLayoutId() {
         return PreferenceConfiguration.readPreferences(AppView.this).smallIconMode ?
-                    R.layout.app_grid_view_small : R.layout.app_grid_view;
+                R.layout.app_grid_view_small : R.layout.app_grid_view;
     }
 
     @Override
     public void receiveAbsListView(AbsListView listView) {
+        // Activity 启动时自动打开第一个项目.
+        AppObject app0 = (AppObject) appGridAdapter.getItem(0);
+        ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
+
         listView.setAdapter(appGridAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override

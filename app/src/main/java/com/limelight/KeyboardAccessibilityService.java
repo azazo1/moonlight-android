@@ -4,7 +4,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +27,7 @@ public class KeyboardAccessibilityService extends AccessibilityService {
 
             if (action == KeyEvent.ACTION_DOWN) {
                 //fix 小米平板esc键按钮映射错误 KEYCODE_BACK=4
-                if(event.getScanCode()==1){
+                if (event.getScanCode() == 1) {
                     Game.instance.handleKeyDown(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ESCAPE));
                     return true;
                 }
@@ -36,7 +35,7 @@ public class KeyboardAccessibilityService extends AccessibilityService {
                 return true;
             } else if (action == KeyEvent.ACTION_UP) {
                 //fix 小米平板esc键按钮映射错误 KEYCODE_BACK=4
-                if(event.getScanCode()==1){
+                if (event.getScanCode() == 1) {
                     Game.instance.handleKeyUp(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ESCAPE));
                     return true;
                 }
@@ -52,7 +51,9 @@ public class KeyboardAccessibilityService extends AccessibilityService {
     public void onServiceConnected() {
         LimeLog.info("Keyboard service is connected");
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.packageNames = new String[] { BuildConfig.APPLICATION_ID };
+        info.packageNames = new String[]{
+                BuildConfig.APPLICATION_ID
+        };
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.notificationTimeout = 100;
         info.flags = AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS;
@@ -64,6 +65,7 @@ public class KeyboardAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
 //        LimeLog.info("onAccessibilityEvent:"+accessibilityEvent.toString());
     }
+
     @Override
     public void onInterrupt() {
 
