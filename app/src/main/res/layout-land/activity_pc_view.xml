@@ -3,82 +3,98 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".PcView" >
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    tools:context=".PcView">
 
     <RelativeLayout
         android:id="@+id/pcFragmentContainer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/settingsButton"
         android:layout_toRightOf="@+id/settingsButton"
-        android:layout_toEndOf="@+id/settingsButton">
+        android:gravity="center">
 
         <RelativeLayout
             android:id="@+id/no_pc_found_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true">
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
             <ProgressBar
                 android:id="@+id/pcs_loading"
                 android:layout_width="75dp"
                 android:layout_height="75dp"
-                android:indeterminate="true"/>
+                android:indeterminate="true" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/pcs_loading"
-                android:layout_toEndOf="@+id/pcs_loading"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
                 android:layout_centerVertical="true"
-                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_toEndOf="@+id/pcs_loading"
+                android:layout_toRightOf="@+id/pcs_loading"
                 android:gravity="center"
-                android:text="@string/searching_pc"/>
+                android:text="@string/searching_pc"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
         </RelativeLayout>
 
     </RelativeLayout>
 
     <ImageButton
         android:id="@+id/settingsButton"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="70dp"
         android:layout_height="65dp"
-        android:cropToPadding="false"
-        android:scaleType="fitXY"
-        android:nextFocusForward="@id/helpButton"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@drawable/ic_settings"
-        style="?android:attr/borderlessButtonStyle"/>
+        android:cropToPadding="false"
+        android:nextFocusForward="@id/helpButton"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_settings" />
 
     <ImageButton
         android:id="@+id/helpButton"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="70dp"
         android:layout_height="65dp"
-        android:cropToPadding="false"
-        android:scaleType="fitXY"
-        android:nextFocusForward="@id/manuallyAddPc"
+        android:layout_below="@id/settingsButton"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/settingsButton"
-        android:src="@drawable/ic_help"
-        style="?android:attr/borderlessButtonStyle"/>
+        android:cropToPadding="false"
+        android:nextFocusForward="@id/manuallyAddPc"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_help" />
 
     <ImageButton
         android:id="@+id/manuallyAddPc"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="70dp"
         android:layout_height="65dp"
-        android:cropToPadding="false"
-        android:scaleType="fitXY"
+        android:layout_below="@id/helpButton"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/helpButton"
-        android:src="@drawable/ic_add"
-        style="?android:attr/borderlessButtonStyle"/>
+        android:cropToPadding="false"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_add" />
+
+
+    <ImageButton
+        android:id="@+id/accessibilityButton"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="70dp"
+        android:layout_height="65dp"
+        android:layout_below="@id/manuallyAddPc"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:cropToPadding="false"
+        android:scaleType="fitXY"
+        android:src="@drawable/accessibility" />
+
 
 </RelativeLayout>

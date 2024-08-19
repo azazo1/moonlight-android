@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -140,6 +141,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         ImageButton settingsButton = findViewById(R.id.settingsButton);
         ImageButton addComputerButton = findViewById(R.id.manuallyAddPc);
         ImageButton helpButton = findViewById(R.id.helpButton);
+        ImageButton accessibilityButton = findViewById(R.id.accessibilityButton);
 
         settingsButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -159,6 +161,9 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             public void onClick(View v) {
                 HelpLauncher.launchSetupGuide(PcView.this);
             }
+        });
+        accessibilityButton.setOnClickListener((v) -> {
+            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
         });
 
         // Amazon review didn't like the help button because the wiki was not entirely
@@ -329,7 +334,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
 
         // Call superclass
         super.onCreateContextMenu(menu, v, menuInfo);
-                
+
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         ComputerObject computer = (ComputerObject) pcGridAdapter.getItem(info.position);
 
