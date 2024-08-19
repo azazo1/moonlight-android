@@ -623,9 +623,11 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
 
     @Override
     public void receiveAbsListView(AbsListView listView) {
-        // Activity 启动时自动打开第一个项目.
-        AppObject app0 = (AppObject) appGridAdapter.getItem(0);
-        ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
+        if (appGridAdapter.getCount() > 0) {
+            // Activity 启动时自动打开第一个项目.
+            AppObject app0 = (AppObject) appGridAdapter.getItem(0);
+            ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
+        }
 
         listView.setAdapter(appGridAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {

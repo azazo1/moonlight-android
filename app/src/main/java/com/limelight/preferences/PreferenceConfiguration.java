@@ -88,12 +88,12 @@ public class PreferenceConfiguration {
     //触控屏幕灵敏度
     private static final String TOUCH_SENSITIVITY="seekbar_touch_sensitivity_opacity_x";
 
-    static final String DEFAULT_RESOLUTION = "1280x720";
-    static final String DEFAULT_FPS = "60";
+    static final String DEFAULT_RESOLUTION = "1920x1080";
+    static final String DEFAULT_FPS = "120";
     private static final boolean DEFAULT_STRETCH = false;
     private static final boolean DEFAULT_SOPS = true;
     private static final boolean DEFAULT_DISABLE_TOASTS = false;
-    private static final boolean DEFAULT_HOST_AUDIO = false;
+    private static final boolean DEFAULT_HOST_AUDIO = true;
     private static final int DEFAULT_DEADZONE = 7;
     private static final int DEFAULT_OPACITY = 90;
     public static final String DEFAULT_LANGUAGE = "default";
@@ -106,7 +106,7 @@ public class PreferenceConfiguration {
     private static final boolean SHOW_GUIDE_BUTTON_DEFAULT = true;
     private static final boolean DEFAULT_ENABLE_HDR = false;
     private static final boolean DEFAULT_ENABLE_PIP = false;
-    private static final boolean DEFAULT_ENABLE_PERF_OVERLAY = false;
+    private static final boolean DEFAULT_ENABLE_PERF_OVERLAY = true;
     private static final boolean DEFAULT_BIND_ALL_USB = false;
     private static final boolean DEFAULT_MOUSE_EMULATION = true;
     private static final String DEFAULT_ANALOG_STICK_FOR_SCROLLING = "right";
@@ -118,7 +118,7 @@ public class PreferenceConfiguration {
     private static final boolean DEFAULT_FLIP_FACE_BUTTONS = false;
     private static final boolean DEFAULT_TOUCHSCREEN_TRACKPAD = true;
     private static final String DEFAULT_AUDIO_CONFIG = "2"; // Stereo
-    private static final boolean DEFAULT_LATENCY_TOAST = false;
+    private static final boolean DEFAULT_LATENCY_TOAST = true;
     private static final String DEFAULT_FRAME_PACING = "latency";
     private static final boolean DEFAULT_ABSOLUTE_MOUSE_MODE = false;
     private static final boolean DEFAULT_ENABLE_AUDIO_FX = false;
