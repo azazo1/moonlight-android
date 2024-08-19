@@ -7,10 +7,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
@@ -25,7 +23,6 @@ import com.limelight.nvstream.input.KeyboardPacket;
 import com.limelight.preferences.PreferenceConfiguration;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -171,7 +168,7 @@ public class GameMenu {
     private void showSpecialKeysMenu() {
         List<MenuOption> options = new ArrayList<>();
 
-        if(!PreferenceConfiguration.readPreferences(game).enableClearDefaultSpecial){
+        if (!PreferenceConfiguration.readPreferences(game).enableClearDefaultSpecial) {
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_esc),
                     () -> sendKeys(new short[]{KeyboardTranslator.VK_ESCAPE})));
 
@@ -206,13 +203,13 @@ public class GameMenu {
                     () -> sendKeys(new short[]{KeyboardTranslator.VK_LWIN, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_LEFT})));
 
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_q),
-                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL,KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_Q})));
+                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_Q})));
 
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_f1),
-                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL,KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F1})));
+                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F1})));
 
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_f12),
-                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL,KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F12})));
+                    () -> sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F12})));
 
             options.add(new MenuOption(getString(R.string.game_menu_send_keys_alt_b),
                     () -> sendKeys(new short[]{KeyboardTranslator.VK_LWIN, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_B})));
@@ -236,30 +233,30 @@ public class GameMenu {
         }
 
         //自定义导入的指令
-        SharedPreferences preferences=game.getSharedPreferences(PREF_NAME, Activity.MODE_PRIVATE);
-        String value=preferences.getString(KEY_NAME,"");
+        SharedPreferences preferences = game.getSharedPreferences(PREF_NAME, Activity.MODE_PRIVATE);
+        String value = preferences.getString(KEY_NAME, "");
 
-        if(!TextUtils.isEmpty(value)){
+        if (!TextUtils.isEmpty(value)) {
             try {
-                JSONObject object=new JSONObject(value);
-                JSONArray array=object.optJSONArray("data");
-                if(array!=null&&array.length()>0){
+                JSONObject object = new JSONObject(value);
+                JSONArray array = object.optJSONArray("data");
+                if (array != null && array.length() > 0) {
                     for (int i = 0; i < array.length(); i++) {
-                        JSONObject object1=array.getJSONObject(i);
-                        String name=object1.optString("name");
-                        JSONArray array1=object1.getJSONArray("data");
-                        short[] datas=new short[array1.length()];
+                        JSONObject object1 = array.getJSONObject(i);
+                        String name = object1.optString("name");
+                        JSONArray array1 = object1.getJSONArray("data");
+                        short[] datas = new short[array1.length()];
                         for (int j = 0; j < array1.length(); j++) {
-                            String code=array1.getString(j);
-                            datas[j]= (short) Integer.parseInt(code.substring(2), 16);
+                            String code = array1.getString(j);
+                            datas[j] = (short) Integer.parseInt(code.substring(2), 16);
                         }
-                        MenuOption option=new MenuOption(name, () -> sendKeys(datas));
+                        MenuOption option = new MenuOption(name, () -> sendKeys(datas));
                         options.add(option);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(game,"自定义导入格式出错了，请检查！",Toast.LENGTH_SHORT).show();
+                Toast.makeText(game, "自定义导入格式出错了，请检查！", Toast.LENGTH_SHORT).show();
             }
         }
         options.add(new MenuOption(getString(R.string.game_menu_cancel), null));
@@ -280,6 +277,12 @@ public class GameMenu {
                 () -> game.switchMouseModel()));
         options.add(new MenuOption(getString(R.string.game_menu_switch_keyboard_model), true,
                 () -> game.showHideKeyboardController()));
+        options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_f1), true, () -> {
+            sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F1});
+        }));
+        options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_f12), true, () -> {
+            sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F12});
+        }));
 //        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
 
 //        options.add(new MenuOption(getString(R.string.game_menu_hud), true,
@@ -306,7 +309,7 @@ public class GameMenu {
 
 
     public void showSetSensitivityDialog(String key) {
-        Context context=game;
+        Context context = game;
         int step = 10;
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("调整触摸灵敏度");
@@ -350,17 +353,18 @@ public class GameMenu {
                 break;
         }
         seekBar.setProgress(initialValue / step);
-        valueText.setText(initialValue+"%");
+        valueText.setText(initialValue + "%");
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                valueText.setText(progress * step +"%");
+                valueText.setText(progress * step + "%");
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
