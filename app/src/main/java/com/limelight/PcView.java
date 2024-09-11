@@ -13,7 +13,9 @@ import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.view.ContextMenu;
@@ -65,6 +67,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class PcView extends Activity implements AdapterFragmentCallbacks {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private RelativeLayout noPcFoundLayout;
     private PcGridAdapter pcGridAdapter;
     private ShortcutHelper shortcutHelper;
@@ -191,30 +194,6 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        // todo 获取不到剪贴板数据.
-        ClipData data = manager.getPrimaryClip();
-        if (data != null && data.getItemCount() > 0) {
-            String text = "" + data.getItemAt(0).getText();
-            Toast.makeText(this, getString(R.string.try_reading_clipboard_ip) + " " + text, Toast.LENGTH_SHORT).show();
-            URI uri = AddComputerManually.parseRawUserInputToUri(text);
-            if (uri != null) {
-                // 清空剪贴板.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    manager.clearPrimaryClip();
-                } else {
-                    manager.setPrimaryClip(ClipData.newPlainText("", ""));
-                }
-                Intent intent = new Intent(this, AddComputerManually.class);
-                intent.putExtra("uri", text);
-                startActivity(intent);
-            }
-        }
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -258,6 +237,26 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             LimeLog.info("Cached GL Renderer: " + glPrefs.glRenderer);
             completeOnCreate();
         }
+        handler.postDelayed(() -> {
+            ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData data = manager.getPrimaryClip();
+            if (data != null && data.getItemCount() > 0) {
+                String text = "" + data.getItemAt(0).getText();
+                Toast.makeText(this, getString(R.string.try_reading_clipboard_ip), Toast.LENGTH_SHORT).show();
+                URI uri = AddComputerManually.parseRawUserInputToUri(text);
+                if (uri != null) {
+                    // 清空剪贴板.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        manager.clearPrimaryClip();
+                    } else {
+                        manager.setPrimaryClip(ClipData.newPlainText("", ""));
+                    }
+                    Intent intent = new Intent(this, AddComputerManually.class);
+                    intent.putExtra("uri", text);
+                    startActivity(intent);
+                }
+            }
+        }, 100);
     }
 
     private void completeOnCreate() {
