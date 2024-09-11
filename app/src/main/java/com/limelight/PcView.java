@@ -3,7 +3,10 @@ package com.limelight;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Service;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
@@ -55,6 +58,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.net.UnknownHostException;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -184,6 +188,30 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             noPcFoundLayout.setVisibility(View.INVISIBLE);
         }
         pcGridAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        // todo 获取不到剪贴板数据.
+        ClipData data = manager.getPrimaryClip();
+        if (data != null && data.getItemCount() > 0) {
+            String text = "" + data.getItemAt(0).getText();
+            Toast.makeText(this, getString(R.string.try_reading_clipboard_ip) + " " + text, Toast.LENGTH_SHORT).show();
+            URI uri = AddComputerManually.parseRawUserInputToUri(text);
+            if (uri != null) {
+                // 清空剪贴板.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    manager.clearPrimaryClip();
+                } else {
+                    manager.setPrimaryClip(ClipData.newPlainText("", ""));
+                }
+                Intent intent = new Intent(this, AddComputerManually.class);
+                intent.putExtra("uri", text);
+                startActivity(intent);
+            }
+        }
     }
 
     @Override

@@ -1,28 +1,5 @@
 package com.limelight.preferences;
 
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import com.limelight.binding.PlatformBinding;
-import com.limelight.computers.ComputerManagerService;
-import com.limelight.R;
-import com.limelight.nvstream.http.ComputerDetails;
-import com.limelight.nvstream.http.NvHTTP;
-import com.limelight.nvstream.jni.MoonBridge;
-import com.limelight.utils.Dialog;
-import com.limelight.utils.ServerHelper;
-import com.limelight.utils.SpinnerDialog;
-import com.limelight.utils.UiHelper;
-
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
@@ -35,8 +12,28 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.limelight.R;
+import com.limelight.computers.ComputerManagerService;
+import com.limelight.nvstream.http.ComputerDetails;
+import com.limelight.nvstream.http.NvHTTP;
+import com.limelight.nvstream.jni.MoonBridge;
+import com.limelight.utils.Dialog;
+import com.limelight.utils.ServerHelper;
+import com.limelight.utils.SpinnerDialog;
+import com.limelight.utils.UiHelper;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class AddComputerManually extends Activity {
     private TextView hostText;
@@ -45,7 +42,7 @@ public class AddComputerManually extends Activity {
     private Thread addThread;
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, final IBinder binder) {
-            managerBinder = ((ComputerManagerService.ComputerManagerBinder)binder);
+            managerBinder = ((ComputerManagerService.ComputerManagerBinder) binder);
             startAddThread();
         }
 
@@ -98,7 +95,7 @@ public class AddComputerManually extends Activity {
         }
     }
 
-    private URI parseRawUserInputToUri(String rawUserInput) {
+    public static URI parseRawUserInputToUri(String rawUserInput) {
         try {
             // Try adding a scheme and parsing the remaining input.
             // This handles input like 127.0.0.1:47989, [::1], [::1]:47989, and 127.0.0.1.
@@ -106,7 +103,8 @@ public class AddComputerManually extends Activity {
             if (uri.getHost() != null && !uri.getHost().isEmpty()) {
                 return uri;
             }
-        } catch (URISyntaxException ignored) {}
+        } catch (URISyntaxException ignored) {
+        }
 
         try {
             // Attempt to escape the input as an IPv6 literal.
@@ -115,7 +113,8 @@ public class AddComputerManually extends Activity {
             if (uri.getHost() != null && !uri.getHost().isEmpty()) {
                 return uri;
             }
-        } catch (URISyntaxException ignored) {}
+        } catch (URISyntaxException ignored) {
+        }
 
         return null;
     }
@@ -127,7 +126,7 @@ public class AddComputerManually extends Activity {
         int portTestResult;
 
         SpinnerDialog dialog = SpinnerDialog.displayDialog(this, getResources().getString(R.string.title_add_pc),
-            getResources().getString(R.string.msg_add_pc), false);
+                getResources().getString(R.string.msg_add_pc), false);
 
         try {
             ComputerDetails details = new ComputerDetails();
@@ -145,7 +144,7 @@ public class AddComputerManually extends Activity {
 
                 details.manualAddress = new ComputerDetails.AddressTuple(host, port);
                 success = managerBinder.addComputerBlocking(details);
-                if (!success){
+                if (!success) {
                     wrongSiteLocal = isWrongSubnetSiteLocalAddress(host);
                 }
             } else {
@@ -179,30 +178,26 @@ public class AddComputerManually extends Activity {
 
         if (invalidInput) {
             Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), getResources().getString(R.string.addpc_unknown_host), false);
-        }
-        else if (wrongSiteLocal) {
+        } else if (wrongSiteLocal) {
             Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), getResources().getString(R.string.addpc_wrong_sitelocal), false);
-        }
-        else if (!success) {
+        } else if (!success) {
             String dialogText;
-            if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0)  {
+            if (portTestResult != MoonBridge.ML_TEST_RESULT_INCONCLUSIVE && portTestResult != 0) {
                 dialogText = getResources().getString(R.string.nettest_text_blocked);
-            }
-            else {
+            } else {
                 dialogText = getResources().getString(R.string.addpc_fail);
             }
             Dialog.displayDialog(this, getResources().getString(R.string.conn_error_title), dialogText, false);
-        }
-        else {
+        } else {
             AddComputerManually.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                Toast.makeText(AddComputerManually.this, getResources().getString(R.string.addpc_success), Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddComputerManually.this, getResources().getString(R.string.addpc_success), Toast.LENGTH_LONG).show();
 
-                if (!isFinishing()) {
-                    // Close the activity
-                    AddComputerManually.this.finish();
-                }
+                    if (!isFinishing()) {
+                        // Close the activity
+                        AddComputerManually.this.finish();
+                    }
                 }
             });
         }
@@ -284,10 +279,9 @@ public class AddComputerManually extends Activity {
                                 keyEvent.getAction() == KeyEvent.ACTION_DOWN &&
                                 keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     return handleDoneEvent();
-                }
-                else if (actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                } else if (actionId == EditorInfo.IME_ACTION_PREVIOUS) {
                     // This is how the Fire TV dismisses the keyboard
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(hostText.getWindowToken(), 0);
                     return false;
                 }
@@ -296,7 +290,8 @@ public class AddComputerManually extends Activity {
             }
         });
 
-        findViewById(R.id.addPcButton).setOnClickListener(new View.OnClickListener() {
+        Button addPCButton = findViewById(R.id.addPcButton);
+        addPCButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 handleDoneEvent();
@@ -305,7 +300,14 @@ public class AddComputerManually extends Activity {
 
         // Bind to the ComputerManager service
         bindService(new Intent(AddComputerManually.this,
-                    ComputerManagerService.class), serviceConnection, Service.BIND_AUTO_CREATE);
+                ComputerManagerService.class), serviceConnection, Service.BIND_AUTO_CREATE);
+
+        Intent intent = getIntent();
+        String uri = intent.getStringExtra("uri");
+        if (uri != null) {
+            hostText.setText(uri);
+            addPCButton.performClick();
+        }
     }
 
     // Returns true if the event should be eaten

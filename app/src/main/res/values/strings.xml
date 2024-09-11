@@ -353,5 +353,6 @@
     <string name="perf_overlay_lite_streamdetails">%1$s</string>
     <string name="perf_overlay_lite_fps">%1$.2f</string>
     <string name="perf_overlay_lite_decoder">解码器： %1$s</string>
+    <string name="try_reading_clipboard_ip">尝试读取剪贴板IP</string>
 
 </resources>
