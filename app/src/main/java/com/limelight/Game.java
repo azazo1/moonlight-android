@@ -1224,6 +1224,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     @Override
     protected void onStop() {
+        if (!autoStop) {
+            moveTaskToBack(true);
+            super.onStop();
+            return;
+        }
         super.onStop();
         SpinnerDialog.closeDialogs(this);
         Dialog.closeDialogs();
@@ -2422,11 +2427,20 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             // thread to keep things smooth for the UI. Inside moonlight-common,
             // we prevent another thread from starting a connection before and
             // during the process of stopping this one.
-            new Thread() {
-                public void run() {
-                    conn.stop();
-                }
-            }.start();
+            if (autoStop) {
+                new Thread() {
+                    public void run() {
+                        conn.stop();
+                    }
+                }.start();
+            } else {
+                // 如果不是自动停止, 那就不关闭连接, 只是关闭视频流输出, 不关闭音频流输出.
+                new Thread() {
+                    public void run() {
+                        conn.backgroundMode();
+                    }
+                }.start();
+            }
         }
     }
 
@@ -2734,6 +2748,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        // 当窗口退出或息屏时, 此方法会被调用.
+
         if (!surfaceCreated) {
             throw new IllegalStateException("Surface destroyed before creation!");
         }
