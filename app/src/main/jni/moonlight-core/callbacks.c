@@ -9,6 +9,7 @@
 #include <android/log.h>
 
 #include <cpu-features.h>
+#include "PlatformSockets.h"
 
 static OpusMSDecoder* Decoder;
 static OPUS_MULTISTREAM_CONFIGURATION OpusConfig;

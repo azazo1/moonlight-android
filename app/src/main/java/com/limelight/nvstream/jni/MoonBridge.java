@@ -133,9 +133,13 @@ public class MoonBridge {
         init();
     }
 
-    public static void removeVideoRenderer() {
-        videoRenderer.stop();
-        videoRenderer.cleanup();
+    public static void backgroundMode() {
+//        cBackgroundMode(); // 可以调用, 但是调用之后会让 sunshine 一段时间后认为连接丢失, 停止传输数据.
+        removeVideoRenderer();
+    }
+
+    private static void removeVideoRenderer() {
+        // 原来的 videoRenderer 在调用 cBackgroundMode 时已经通过回调函数处理了.
         // 创建一个假的视频流, 防止多线程时 null pointer exception.
         videoRenderer = new VideoDecoderRenderer() {
             @Override
@@ -378,6 +382,8 @@ public class MoonBridge {
         MoonBridge.audioRenderer = null;
         MoonBridge.connectionListener = null;
     }
+
+    private static native int cBackgroundMode();
 
     public static native int startConnection(String address, String appVersion, String gfeVersion,
                                              String rtspSessionUrl, int serverCodecModeSupport,

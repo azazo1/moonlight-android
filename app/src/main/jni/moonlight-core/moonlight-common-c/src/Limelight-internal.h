@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Platform.h"
 #include "Limelight.h"
 #include "PlatformSockets.h"
@@ -12,6 +11,8 @@
 #include "ByteBuffer.h"
 
 #include <enet/enet.h>
+
+extern bool backgroundMode;
 
 // Common globals
 extern char* RemoteAddrString;

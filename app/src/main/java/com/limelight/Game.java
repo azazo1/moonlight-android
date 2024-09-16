@@ -107,7 +107,15 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         OnSystemUiVisibilityChangeListener, GameGestures, StreamView.InputCallbacks,
         PerfOverlayListener, UsbDriverService.UsbDriverStateListener, View.OnKeyListener {
     public static Game instance;
-    public boolean autoStop = true;
+    /**
+     * 是否允许进入后台模式, 后台模式可以取消画面显示, 只聆听声音.
+     * 后台模式时仍会产生视频流量, 但是没有视频画面.
+     */
+    public static boolean backgroundMode = false;
+    /**
+     * 上次使用的 PC 名称, 用于快速从后台模式中恢复.
+     */
+    public static String lastPCName = null;
 
     private int lastButtonState = 0;
 
@@ -376,7 +384,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
 
         appName = Game.this.getIntent().getStringExtra(EXTRA_APP_NAME);
-        pcName = Game.this.getIntent().getStringExtra(EXTRA_PC_NAME);
+        lastPCName = pcName = Game.this.getIntent().getStringExtra(EXTRA_PC_NAME);
 
         String host = Game.this.getIntent().getStringExtra(EXTRA_HOST);
         int port = Game.this.getIntent().getIntExtra(EXTRA_PORT, NvHTTP.DEFAULT_HTTP_PORT);
@@ -1224,8 +1232,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     @Override
     protected void onStop() {
-        if (!autoStop) {
-            moveTaskToBack(true);
+        if (backgroundMode) {
             super.onStop();
             return;
         }
@@ -2427,14 +2434,14 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             // thread to keep things smooth for the UI. Inside moonlight-common,
             // we prevent another thread from starting a connection before and
             // during the process of stopping this one.
-            if (autoStop) {
+            if (!backgroundMode) {
                 new Thread() {
                     public void run() {
                         conn.stop();
                     }
                 }.start();
             } else {
-                // 如果不是自动停止, 那就不关闭连接, 只是关闭视频流输出, 不关闭音频流输出.
+                // 如果不是自动停止(而是是后台模式), 那就不关闭连接, 只是关闭视频流输出, 不关闭音频流输出.
                 new Thread() {
                     public void run() {
                         conn.backgroundMode();
@@ -2990,6 +2997,9 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
 
     public void disconnect() {
+        // 手动断开连接后自动退出后台模式.
+        backgroundMode = false;
+        lastPCName = null;
         finish();
     }
 

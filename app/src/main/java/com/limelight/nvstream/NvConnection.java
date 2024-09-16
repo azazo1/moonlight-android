@@ -85,7 +85,7 @@ public class NvConnection {
 
     public void backgroundMode() {
         // 调用此方法之后如果要关闭连接, 需要先获取锁然后调用 stop 方法.
-        MoonBridge.removeVideoRenderer();
+        MoonBridge.backgroundMode();
         connectionAllowed.release();
     }
 

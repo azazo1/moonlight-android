@@ -12,6 +12,7 @@ import com.limelight.nvstream.http.ComputerDetails;
 import com.limelight.nvstream.http.PairingManager;
 import com.limelight.preferences.PreferenceConfiguration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -33,6 +34,10 @@ public class PcGridAdapter extends GenericGridAdapter<PcView.ComputerObject> {
     public void addComputer(PcView.ComputerObject computer) {
         itemList.add(computer);
         sortList();
+    }
+
+    public ArrayList<PcView.ComputerObject> getComputers() {
+        return new ArrayList<>(itemList);
     }
 
     private void sortList() {

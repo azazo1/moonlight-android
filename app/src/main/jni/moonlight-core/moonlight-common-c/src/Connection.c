@@ -1,5 +1,7 @@
 #include "Limelight-internal.h"
 
+bool backgroundMode = false;
+
 static int stage = STAGE_NONE;
 static ConnListenerConnectionTerminated originalTerminationCallback;
 static bool alreadyTerminated;
@@ -209,6 +211,7 @@ int LiStartConnection(PSERVER_INFORMATION serverInfo, PSTREAM_CONFIGURATION stre
                       PDECODER_RENDERER_CALLBACKS drCallbacks,
                       PAUDIO_RENDERER_CALLBACKS arCallbacks, void *renderContext, int drFlags,
                       void *audioContext, int arFlags) {
+    backgroundMode = false;
     int err;
 
     if (drCallbacks != NULL && (drCallbacks->capabilities & CAPABILITY_PULL_RENDERER) &&

@@ -50,6 +50,11 @@ import java.util.HashSet;
 import java.util.List;
 
 public class AppView extends Activity implements AdapterFragmentCallbacks {
+    private boolean gameAutoStartedOnce = false;
+    /**
+     * 用于标记每次获取焦点时只判定自动启动一次.
+     */
+    private boolean canAutoStart = true;
     private AppGridAdapter appGridAdapter;
     private String uuidString;
     private ShortcutHelper shortcutHelper;
@@ -187,6 +192,8 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
         managerBinder.startPolling(new ComputerManagerListener() {
             @Override
             public void notifyComputerUpdated(final ComputerDetails details) {
+                // 这个代码块会被反复调用.
+
                 // Do nothing if updates are suspended
                 if (suspendGridUpdates) {
                     return;
@@ -197,6 +204,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
                     return;
                 }
 
+                // 当前 PC.
                 if (details.state == ComputerDetails.State.OFFLINE) {
                     // The PC is unreachable now
                     AppView.this.runOnUiThread(new Runnable() {
@@ -231,6 +239,21 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
 
                 // App list is the same or empty
                 if (details.rawAppList == null || details.rawAppList.equals(lastRawApplist)) {
+                    // 只有在各种情况都和原来一样的时候才快速启动.
+                    if (canAutoStart && appGridAdapter.getCount() > 0) {
+                        if (!gameAutoStartedOnce) {
+                            // 启动 activity 或者 onResume 时自动打开第一个项目.
+                            AppObject app0 = (AppObject) appGridAdapter.getItem(0);
+                            ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
+                            gameAutoStartedOnce = true; // 只会自动启动一次
+                        } else if (Game.backgroundMode && Game.instance == null) {
+                            // 从后台模式中恢复, 快速启动.
+                            AppObject app0 = (AppObject) appGridAdapter.getItem(0);
+                            ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
+                        }
+                        // 对当前的 PC 进行了一次判定后不再判定自动启动, 除非再次失去焦点.
+                        canAutoStart = false;
+                    }
 
                     // Let's check if the running app ID changed
                     if (details.runningGameId != lastRunningAppId) {
@@ -386,6 +409,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
 
         inForeground = false;
         stopComputerUpdates();
+        canAutoStart = true;
     }
 
     @Override
@@ -622,13 +646,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
     }
 
     @Override
-    public void receiveAbsListView(AbsListView listView) {
-        if (appGridAdapter.getCount() > 0) {
-            // Activity 启动时自动打开第一个项目.
-            AppObject app0 = (AppObject) appGridAdapter.getItem(0);
-            ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
-        }
-
+    public void receiveAbsListView(AbsListView listView) { // onCreate 后不久会触发.
         listView.setAdapter(appGridAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override

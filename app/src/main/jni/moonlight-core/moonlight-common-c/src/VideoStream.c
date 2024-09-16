@@ -1,9 +1,12 @@
+#include <jni.h>
 #include "Limelight-internal.h"
 
 #define FIRST_FRAME_MAX 1500
 #define FIRST_FRAME_TIMEOUT_SEC 10
 
 #define FIRST_FRAME_PORT 47996
+
+static bool videoStreamClosed = false;
 
 static RTP_VIDEO_QUEUE rtpQueue;
 
@@ -46,6 +49,7 @@ void initializeVideoStream(void) {
 
 // Clean up the video stream
 void destroyVideoStream(void) {
+    if (videoStreamClosed) { return; }
     PltDestroyCryptoContext(decryptionCtx);
     destroyVideoDepacketizer();
     RtpvCleanupQueue(&rtpQueue);
@@ -71,11 +75,16 @@ static void VideoPingThreadProc(void *context) {
             pingCount++;
             VideoPingPayload.sequenceNumber = BE32(pingCount);
 
-            sendto(rtpSocket, (char *) &VideoPingPayload, sizeof(VideoPingPayload), 0,
-                   (struct sockaddr *) &saddr, AddrLen);
+            if (!backgroundMode) {
+                sendto(rtpSocket, (char *) &VideoPingPayload, sizeof(VideoPingPayload), 0,
+                       (struct sockaddr *) &saddr, AddrLen);
+            }
         } else {
-            sendto(rtpSocket, legacyPingData, sizeof(legacyPingData), 0, (struct sockaddr *) &saddr,
-                   AddrLen);
+            if (!backgroundMode) {
+                sendto(rtpSocket, legacyPingData, sizeof(legacyPingData), 0,
+                       (struct sockaddr *) &saddr,
+                       AddrLen);
+            }
         }
 
         PltSleepMsInterruptible(&udpPingThread, 500);
@@ -124,6 +133,11 @@ static void VideoReceiveThreadProc(void *context) {
 
     waitingForVideoMs = 0;
     while (!PltIsThreadInterrupted(&receiveThread)) {
+        if (backgroundMode) {
+            PltSleepMs(100);
+            continue;
+        }
+
         PRTP_PACKET packet;
 
         if (buffer == NULL) {
@@ -282,6 +296,8 @@ int readFirstFrame(void) {
 
 // Terminate the video stream
 void stopVideoStream(void) {
+    if (videoStreamClosed) { return; }
+
     if (!receivedDataFromPeer) {
         Limelog("No video traffic was ever received from the host!\n");
     }
@@ -323,6 +339,8 @@ void stopVideoStream(void) {
 
 // Start the video stream
 int startVideoStream(void *rendererContext, int drFlags) {
+    videoStreamClosed = false;
+
     int err;
 
     firstFrameSocket = INVALID_SOCKET;
@@ -425,5 +443,15 @@ int startVideoStream(void *rendererContext, int drFlags) {
         }
     }
 
+    return 0;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_cBackgroundMode(JNIEnv *env, jclass clazz) {
+    // 关闭 rtp 视频流, 但是其他的不关闭, 假装正常状态.
+    backgroundMode = true;
+    stopVideoStream();
+    destroyVideoStream();
+    videoStreamClosed = true;
     return 0;
 }
