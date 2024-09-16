@@ -354,7 +354,7 @@
     <string name="perf_overlay_lite_fps">%1$.2f</string>
     <string name="perf_overlay_lite_decoder">解码器： %1$s</string>
     <string name="try_reading_clipboard_ip">尝试读取剪贴板IP</string>
-    <string name="auto_stop_off">不自动暂停</string>
-    <string name="auto_stop_on">自动暂停</string>
+    <string name="auto_stop_off">设置成: 不自动暂停</string>
+    <string name="auto_stop_on">设置成: 自动暂停</string>
 
 </resources>

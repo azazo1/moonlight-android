@@ -1225,10 +1225,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     @Override
     protected void onStop() {
         super.onStop();
-
-        if (!autoStop) {
-            return;
-        }
         SpinnerDialog.closeDialogs(this);
         Dialog.closeDialogs();
 
