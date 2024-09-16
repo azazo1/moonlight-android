@@ -74,6 +74,7 @@ import com.limelight.binding.video.PerfOverlayListener;
 import com.limelight.nvstream.NvConnection;
 import com.limelight.nvstream.NvConnectionListener;
 import com.limelight.nvstream.StreamConfiguration;
+import com.limelight.nvstream.av.video.VideoDecoderRenderer;
 import com.limelight.nvstream.http.ComputerDetails;
 import com.limelight.nvstream.http.NvApp;
 import com.limelight.nvstream.http.NvHTTP;
@@ -111,7 +112,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
      * 是否允许进入后台模式, 后台模式可以取消画面显示, 只聆听声音.
      * 后台模式时仍会产生视频流量, 但是没有视频画面.
      */
-    public static boolean backgroundMode = false;
+    public static boolean allowBackgroundMode = false;
     /**
      * 上次使用的 PC 名称, 用于快速从后台模式中恢复.
      */
@@ -215,6 +216,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     public static final String EXTRA_SERVER_CERT = "ServerCert";
 
     private ViewParent rootView;
+    private VideoDecoderRenderer cachedVideoRenderer;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -624,7 +626,6 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         if (prefConfig.enableExDisplay) {
             showSecondScreen();
         }
-
     }
 
     private void initKeyboardController() {
@@ -1231,12 +1232,21 @@ public class Game extends Activity implements SurfaceHolder.Callback,
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (allowBackgroundMode && cachedVideoRenderer != null) {
+            conn.restoreFromBackgroundMode(cachedVideoRenderer);
+        }
+    }
+
+    @Override
     protected void onStop() {
-        if (backgroundMode) {
-            super.onStop();
+        super.onStop();
+
+        if (allowBackgroundMode) {
             return;
         }
-        super.onStop();
+
         SpinnerDialog.closeDialogs(this);
         Dialog.closeDialogs();
 
@@ -2434,20 +2444,11 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             // thread to keep things smooth for the UI. Inside moonlight-common,
             // we prevent another thread from starting a connection before and
             // during the process of stopping this one.
-            if (!backgroundMode) {
-                new Thread() {
-                    public void run() {
-                        conn.stop();
-                    }
-                }.start();
-            } else {
-                // 如果不是自动停止(而是是后台模式), 那就不关闭连接, 只是关闭视频流输出, 不关闭音频流输出.
-                new Thread() {
-                    public void run() {
-                        conn.backgroundMode();
-                    }
-                }.start();
-            }
+            new Thread() {
+                public void run() {
+                    conn.stop();
+                }
+            }.start();
         }
     }
 
@@ -2762,11 +2763,15 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         }
 
         if (attemptedConnection) {
-            // Let the decoder know immediately that the surface is gone
-            decoderRenderer.prepareForStop();
-
-            if (connected) {
-                stopConnection();
+            if (!allowBackgroundMode) {
+                // Let the decoder know immediately that the surface is gone
+                decoderRenderer.prepareForStop();
+                if (connected) {
+                    stopConnection();
+                }
+            } else {
+                // 如果是后台模式, 那就不关闭连接, 在后台播放音频.
+                cachedVideoRenderer = conn.backgroundMode();
             }
         }
     }
@@ -2998,7 +3003,7 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
     public void disconnect() {
         // 手动断开连接后自动退出后台模式.
-        backgroundMode = false;
+        allowBackgroundMode = false;
         lastPCName = null;
         finish();
     }

@@ -283,8 +283,8 @@ public class GameMenu {
         options.add(new MenuOption(getString(R.string.game_menu_send_keys_ctrl_alt_shift_f12), true, () -> {
             sendKeys(new short[]{KeyboardTranslator.VK_LCONTROL, KeyboardTranslator.VK_LMENU, KeyboardTranslator.VK_LSHIFT, KeyboardTranslator.VK_F12});
         }));
-        options.add(new MenuOption(Game.backgroundMode ? getString(R.string.background_mode_off) : getString(R.string.background_mode_on), true, () -> {
-            Game.backgroundMode = !Game.backgroundMode;
+        options.add(new MenuOption(Game.allowBackgroundMode ? getString(R.string.background_mode_off) : getString(R.string.background_mode_on), true, () -> {
+            Game.allowBackgroundMode = !Game.allowBackgroundMode;
         }));
 //        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
 

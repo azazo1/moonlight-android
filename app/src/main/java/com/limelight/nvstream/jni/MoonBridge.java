@@ -133,13 +133,22 @@ public class MoonBridge {
         init();
     }
 
-    public static void backgroundMode() {
+//    /**
+//     * 进入后台模式.
+//     *
+//     * @return 返回原本的 VideoRenderer, 没有销毁, 需要手动操作, 或者在恢复的时候重新设置.
+//     */
+//    public static VideoDecoderRenderer backgroundMode() {
 //        cBackgroundMode(); // 可以调用, 但是调用之后会让 sunshine 一段时间后认为连接丢失, 停止传输数据.
-        removeVideoRenderer();
+//        return fakeVideoRenderer();
+//    }
+
+    public static void setVideoRenderer(VideoDecoderRenderer renderer) {
+        videoRenderer = renderer;
     }
 
-    private static void removeVideoRenderer() {
-        // 原来的 videoRenderer 在调用 cBackgroundMode 时已经通过回调函数处理了.
+    public static VideoDecoderRenderer fakeVideoRenderer() {
+        var raw = videoRenderer;
         // 创建一个假的视频流, 防止多线程时 null pointer exception.
         videoRenderer = new VideoDecoderRenderer() {
             @Override
@@ -177,6 +186,7 @@ public class MoonBridge {
 
             }
         };
+        return raw;
     }
 
     public static int CAPABILITY_SLICES_PER_FRAME(byte slices) {

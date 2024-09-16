@@ -238,7 +238,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             completeOnCreate();
         }
         handler.postDelayed(() -> {
-            if (Game.backgroundMode) {
+            if (Game.allowBackgroundMode) {
                 // 后台模式启动时, 说明已经有连接了, 不用通过检查剪贴板的方式搜索 pc.
 
             } else {
@@ -756,7 +756,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             pcGridAdapter.addComputer(new ComputerObject(details));
 
             // 从后台模式中重新进入应用时自动快速进入 Game.
-            if (Game.backgroundMode && Game.lastPCName != null) {
+            if (Game.allowBackgroundMode && Game.lastPCName != null) {
                 if (Game.lastPCName.equals(details.name)) {
                     doAppList(details, false, false);
                 }

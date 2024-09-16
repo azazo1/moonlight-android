@@ -83,10 +83,20 @@ public class NvConnection {
         return new SecureRandom().nextInt();
     }
 
-    public void backgroundMode() {
+    public VideoDecoderRenderer backgroundMode() {
         // 调用此方法之后如果要关闭连接, 需要先获取锁然后调用 stop 方法.
-        MoonBridge.backgroundMode();
+        var videoRenderer = MoonBridge.fakeVideoRenderer();
         connectionAllowed.release();
+        return videoRenderer;
+    }
+
+    public void restoreFromBackgroundMode(VideoDecoderRenderer renderer) {
+        MoonBridge.setVideoRenderer(renderer);
+        try {
+            connectionAllowed.acquire();
+        } catch (InterruptedException e) {
+            context.connListener.displayMessage(e.getMessage());
+        }
     }
 
     public void stop() {
@@ -378,9 +388,14 @@ public class NvConnection {
 
                 String appName = context.streamConfig.getApp().getAppName();
 
-                context.connListener.stageStarting(appName);
-
                 try {
+                    context.connListener.stageStarting("正在尝试关闭原有连接...");
+                    connectionAllowed.acquire();
+                    // 把原来的后台连接关闭后再检查并创建新连接.
+                    stop();
+                    context.connListener.stageComplete("正在尝试关闭原有连接...");
+
+                    context.connListener.stageStarting(appName);
                     if (!startApp()) {
                         context.connListener.stageFailed(appName, 0, 0);
                         return;
@@ -396,6 +411,9 @@ public class NvConnection {
                     context.connListener.displayMessage(e.getMessage());
                     context.connListener.stageFailed(appName, MoonBridge.ML_PORT_FLAG_TCP_47984 | MoonBridge.ML_PORT_FLAG_TCP_47989, 0);
                     return;
+                } catch (InterruptedException e) {
+                    context.connListener.displayMessage(e.getMessage());
+                    context.connListener.stageFailed(appName, 0, 0);
                 }
 
                 ByteBuffer ib = ByteBuffer.allocate(16);
@@ -404,9 +422,6 @@ public class NvConnection {
                 // Acquire the connection semaphore to ensure we only have one
                 // connection going at once.
                 try {
-                    connectionAllowed.acquire();
-                    // 把原来的后台连接关闭后再创建新连接.
-                    stop();
                     connectionAllowed.acquire();
                 } catch (InterruptedException e) {
                     context.connListener.displayMessage(e.getMessage());

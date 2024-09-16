@@ -246,7 +246,7 @@ public class AppView extends Activity implements AdapterFragmentCallbacks {
                             AppObject app0 = (AppObject) appGridAdapter.getItem(0);
                             ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
                             gameAutoStartedOnce = true; // 只会自动启动一次
-                        } else if (Game.backgroundMode && Game.instance == null) {
+                        } else if (Game.allowBackgroundMode && Game.instance == null) {
                             // 从后台模式中恢复, 快速启动.
                             AppObject app0 = (AppObject) appGridAdapter.getItem(0);
                             ServerHelper.doStart(AppView.this, app0.app, computer, managerBinder);
