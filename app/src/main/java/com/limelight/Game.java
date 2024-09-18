@@ -5,6 +5,10 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.Service;
 import android.content.ComponentName;
@@ -28,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Rational;
 import android.view.Display;
 import android.view.Gravity;
@@ -626,7 +631,10 @@ public class Game extends Activity implements SurfaceHolder.Callback,
         if (prefConfig.enableExDisplay) {
             showSecondScreen();
         }
+
+        dismissNotification();
     }
+
 
     private void initKeyboardController() {
         keyBoardController = new KeyBoardController(controllerHandler, (FrameLayout) rootView, this);
@@ -1214,6 +1222,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
 
         // Destroy the capture provider
         inputCaptureProvider.destroy();
+
+        createNotification();
     }
 
     @Override
@@ -3056,5 +3066,55 @@ public class Game extends Activity implements SurfaceHolder.Callback,
             }
         });
         streamView.setClipToOutline(true);
+    }
+
+    /**
+     * 关闭后台运行通知.
+     */
+    private void dismissNotification() {
+        var manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
+        manager.cancel(1);
+    }
+
+    /**
+     * 创建通过通知启动 moonlight 应用的 Pending Intent.
+     */
+    private PendingIntent createPendingIntent() {
+        return PendingIntent.getActivity(
+                this, // Context, 就算 PendingIntent 被触发时此 context 被销毁了也没事.
+                1, // 只能用于PendingIntent自身的创建辨别, 创建后我的代码一般无法获取
+                new Intent(this, PcView.class), // 启动 PcView.
+                PendingIntent.FLAG_IMMUTABLE // 此 PendingIntent 内容不可变, 后面的修改会被忽略,
+                // android S+(>=31) 要求必须要有填 IMMUTABLE 或者 MUTABLE.
+        );
+    }
+
+    /**
+     * 显示后台运行中的通知.
+     */
+    private void createNotification() {
+        if (allowBackgroundMode) {
+            // 显示通知提示用户.
+            NotificationManager manager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                manager.createNotificationChannel(new NotificationChannel(getPackageName() /*通知渠道的id*/, getString(R.string.background_notification_name),
+                        NotificationManager.IMPORTANCE_HIGH));
+                var builder = new NotificationCompat.Builder(this, getPackageName());
+                builder.setContentTitle(getString(R.string.background_notification_name))
+                        .setContentText(getString(R.string.moonlight_azo_background_streaming))
+                        .setSmallIcon(R.drawable.app_icon)
+                        .setContentIntent(createPendingIntent())
+                        .setOngoing(true);
+                manager.notify(1 /*通知实例的id*/, builder.build());
+            } else {
+                var builder = new Notification.Builder(this);
+                builder.setContentTitle(getString(R.string.background_notification_name))
+                        .setContentText(getString(R.string.moonlight_azo_background_streaming))
+                        .setSmallIcon(R.drawable.app_icon)
+                        .setContentIntent(createPendingIntent())
+                        .setOngoing(true);
+                manager.notify(1 /*通知实例的id*/, builder.build());
+            }
+        }
     }
 }

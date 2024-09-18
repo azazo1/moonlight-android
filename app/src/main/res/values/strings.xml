@@ -358,5 +358,7 @@
     <string name="background_mode_on">设置成: 后台模式</string>
     <string name="background_streaming">后台串流</string>
     <string name="set_mode_and_enter_background">设置成后台模式并进入后台串流</string>
+    <string name="background_notification_name">Moonlight-azo 后台服务提醒</string>
+    <string name="moonlight_azo_background_streaming">Moonlight-azo 正在后台串流中, 点击进入前台</string>
 
 </resources>
