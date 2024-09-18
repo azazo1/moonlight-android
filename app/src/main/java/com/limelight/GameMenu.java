@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
@@ -285,6 +286,14 @@ public class GameMenu {
         }));
         options.add(new MenuOption(Game.allowBackgroundMode ? getString(R.string.background_mode_off) : getString(R.string.background_mode_on), true, () -> {
             Game.allowBackgroundMode = !Game.allowBackgroundMode;
+        }));
+        options.add(new MenuOption(Game.allowBackgroundMode ? getString(R.string.background_streaming) : getString(R.string.set_mode_and_enter_background), true, () -> {
+            if (!Game.allowBackgroundMode) {
+                Game.allowBackgroundMode = true;
+            }
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            game.startActivity(intent);
         }));
 //        options.add(new MenuOption(getString(R.string.game_menu_send_keys), () -> showSpecialKeysMenu()));
 

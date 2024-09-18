@@ -356,5 +356,7 @@
     <string name="try_reading_clipboard_ip">尝试读取剪贴板IP</string>
     <string name="background_mode_off">设置成: 非后台模式</string>
     <string name="background_mode_on">设置成: 后台模式</string>
+    <string name="background_streaming">后台串流</string>
+    <string name="set_mode_and_enter_background">设置成后台模式并进入后台串流</string>
 
 </resources>
