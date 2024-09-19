@@ -3115,7 +3115,8 @@ public class Game extends Activity implements SurfaceHolder.Callback,
                         .setOngoing(true);
                 manager.notify(1 /*通知实例的id*/, builder.build());
             }
-            // activity 销毁时, toast 无法正常显示, 不写了.
+            // activity 销毁时, toast 在没有允许通知时无法正常显示.
+            Toast.makeText(this, getString(R.string.moonlight_azo_background_streaming_toast), Toast.LENGTH_SHORT).show();
         }
     }
 }
