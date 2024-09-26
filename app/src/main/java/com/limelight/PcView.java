@@ -240,7 +240,6 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         handler.postDelayed(() -> {
             if (Game.allowBackgroundMode) {
                 // 后台模式启动时, 说明已经有连接了, 不用通过检查剪贴板的方式搜索 pc.
-
             } else {
                 ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData data = manager.getPrimaryClip();
@@ -332,6 +331,35 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         if (managerBinder != null) {
             unbindService(serviceConnection);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        handler.postDelayed(() -> {
+            if (Game.allowBackgroundMode) {
+                // 后台模式启动时, 说明已经有连接了, 不用通过检查剪贴板的方式搜索 pc.
+            } else {
+                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData data = manager.getPrimaryClip();
+                if (data != null && data.getItemCount() > 0) {
+                    String text = "" + data.getItemAt(0).getText();
+                    Toast.makeText(this, getString(R.string.try_reading_clipboard_ip), Toast.LENGTH_SHORT).show();
+                    URI uri = AddComputerManually.parseRawUserInputToUri(text);
+                    if (uri != null) {
+                        // 清空剪贴板.
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            manager.clearPrimaryClip();
+                        } else {
+                            manager.setPrimaryClip(ClipData.newPlainText("", ""));
+                        }
+                        Intent intent = new Intent(this, AddComputerManually.class);
+                        intent.putExtra("uri", text);
+                        startActivity(intent);
+                    }
+                }
+            }
+        }, 100);
     }
 
     @Override
