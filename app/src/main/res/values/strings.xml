@@ -361,5 +361,6 @@
     <string name="background_notification_name">Moonlight-azo 后台服务提醒</string>
     <string name="moonlight_azo_background_streaming">Moonlight-azo 正在后台串流中, 点击进入前台</string>
     <string name="moonlight_azo_background_streaming_toast">Moonlight-azo 正在后台串流中</string>
+    <string name="failed_to_launch_myddnsservice">Failed to launch myddnsservice.</string>
 
 </resources>

@@ -3,6 +3,7 @@ package com.limelight;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Service;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -60,13 +61,15 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class PcView extends Activity implements AdapterFragmentCallbacks {
+    private final int MY_DDNS_REQUEST_CODE = 1010;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private RelativeLayout noPcFoundLayout;
     private PcGridAdapter pcGridAdapter;
@@ -238,6 +241,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             completeOnCreate();
         }
         handler.postDelayed(() -> {
+            boolean uriValid = false;
             if (Game.allowBackgroundMode) {
                 // 后台模式启动时, 说明已经有连接了, 不用通过检查剪贴板的方式搜索 pc.
             } else {
@@ -246,8 +250,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
                 if (data != null && data.getItemCount() > 0) {
                     String text = "" + data.getItemAt(0).getText();
                     Toast.makeText(this, getString(R.string.try_reading_clipboard_ip), Toast.LENGTH_SHORT).show();
-                    URI uri = AddComputerManually.parseRawUserInputToUri(text);
-                    if (uri != null) {
+                    if (isValidUri(text)) {
                         // 清空剪贴板.
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                             manager.clearPrimaryClip();
@@ -257,10 +260,54 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
                         Intent intent = new Intent(this, AddComputerManually.class);
                         intent.putExtra("uri", text);
                         startActivity(intent);
+                        uriValid = true;
                     }
                 }
             }
+            if (!uriValid) {
+                var intent = new Intent() {{
+                    putExtra("oneshot", true);
+                    setClassName("com.azazo1.myddnsservice", "com.azazo1.myddnsservice.MainActivity");
+                }};
+                try {
+                    startActivityForResult(intent, MY_DDNS_REQUEST_CODE);
+                } catch (ActivityNotFoundException ignore) {
+                    Toast.makeText(this, R.string.failed_to_launch_myddnsservice, Toast.LENGTH_SHORT).show();
+                }
+            }
         }, 100);
+    }
+
+    private static boolean isValidUri(String ipStr) {
+        try {
+            if (ipStr.contains(":")) {
+                InetSocketAddress address = new InetSocketAddress(ipStr.substring(0, ipStr.indexOf(":")), 100);
+            } else {
+                InetSocketAddress address = new InetSocketAddress(ipStr, 100);
+            }
+            return true;
+        } catch (Exception ignore) {
+            return false;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_DDNS_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    manager.clearPrimaryClip();
+                } else {
+                    manager.setPrimaryClip(ClipData.newPlainText("", ""));
+                }
+                var uri = data.getStringExtra("address");
+                Intent intent = new Intent(this, AddComputerManually.class);
+                intent.putExtra("uri", uri);
+                startActivity(intent);
+            }
+        }
     }
 
     private void completeOnCreate() {
@@ -331,35 +378,6 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         if (managerBinder != null) {
             unbindService(serviceConnection);
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        handler.postDelayed(() -> {
-            if (Game.allowBackgroundMode) {
-                // 后台模式启动时, 说明已经有连接了, 不用通过检查剪贴板的方式搜索 pc.
-            } else {
-                ClipboardManager manager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData data = manager.getPrimaryClip();
-                if (data != null && data.getItemCount() > 0) {
-                    String text = "" + data.getItemAt(0).getText();
-                    Toast.makeText(this, getString(R.string.try_reading_clipboard_ip), Toast.LENGTH_SHORT).show();
-                    URI uri = AddComputerManually.parseRawUserInputToUri(text);
-                    if (uri != null) {
-                        // 清空剪贴板.
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            manager.clearPrimaryClip();
-                        } else {
-                            manager.setPrimaryClip(ClipData.newPlainText("", ""));
-                        }
-                        Intent intent = new Intent(this, AddComputerManually.class);
-                        intent.putExtra("uri", text);
-                        startActivity(intent);
-                    }
-                }
-            }
-        }, 100);
     }
 
     @Override
